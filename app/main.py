@@ -1,17 +1,20 @@
 # /app/main.py
 
 from fastapi import FastAPI
-from . import models # models.py 가져오기
-from .database import engine # database.py에서 engine 가져오기
+from contextlib import asynccontextmanager
+from . import models
+from .database import engine
 
-# models.py 에서 정의한 모든 테이블을 데이터베이스에 생성
-# PostgreSQL의 siseon_db안에 articles 테이블이 생성
-models.Base.metadata.create_all(bind=engine)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("서버 시작: 데이터베이스 테이블 생성을 시도합니다.")
+    # 이 코드가 models.py의 모든 테이블을 생성합니다.
+    models.Base.metadata.create_all(bind=engine)
+    yield
+    print("서버 종료.")
 
-# FastAPI 앱 인스턴스 생성
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
-# '/api/v1/articles'라는 주소(URL)로 GET 요청이 오면 return
 @app.get("/")
 def read_root():
-    return {"Hello": "Database Setup Coomplete!"}
+    return {"message": "Siseon backend is running!"}

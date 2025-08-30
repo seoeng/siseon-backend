@@ -1,17 +1,15 @@
 # /app/models.py
 
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, Text, DateTime
+from sqlalchemy.sql import func
 from .database import Base
-from datetime import datetime, timezone
 
+# 클래스 이름이 반드시 Article 이어야 합니다.
 class Article(Base):
-    __tablename__ = "articles"  # 테이블 이름
+    __tablename__ = "articles"
 
-    # 테이블 컬럼 정의
-    article_id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True)
-    original_url = Column(String, unique=True, index=True)
-    source_name = Column(String)
-    summary = Column(String)
-    published_at = Column(DateTime)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    content = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
